@@ -1,2 +1,3 @@
-# msds_corpus_generator
-Takes most of the hassle away from compiling MSDS data
+# MSDS Corpus Generator
+
+Takes most of the hassle away from compiling MSDS data.
