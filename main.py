@@ -5,10 +5,11 @@ import urllib.request
 import tkinter as tk
 import multiprocessing
 
-import pyPdf
+import PyPDF2 as pdf
 
 
 class Object:
+    """Container for generic object."""
 
     def __init__(self, obj_class: str, obj_brand: str, obj: str, link: str,
                  date: str):
@@ -23,19 +24,24 @@ class Object:
                                                  brand=self.brand if self.brand != "" else "Material",
                                                  obj=self.obj)
 
+    def get_name(self):
+        return ((obj.brand.lower() if obj.brand else "material") +
+                "_" + obj.obj.lower()).replace(" ", "_")
+
 
 def download_pdf(obj):
+    """Downloads PDF documents found at the given links."""
     dirs = "{}".format(obj.obj_class)
+
     if not os.path.isdir(dirs):
         os.makedirs(dirs)
 
-    # TODO Modify the return_pdf_name() function
-    with open(os.path.join(dirs, self.__return_pdf_name()), "wb") as pdffile:
+    with open(os.path.join(dirs, obj.get_name() + ".pdf"), "wb") as pdffile:
         try:
-            request = urllib.request.urlopen(self.link)
+            request = urllib.request.urlopen(obj.link)
             pdffile.write(request.read())
         except Exception as e:
-            pass
+            print(e)
 
 
 class Window:
@@ -112,14 +118,20 @@ class Window:
                     self.listing.append(Object(*row))
 
     def download_all(self) -> None:
+        # TODO Grey out all fields when downloading
         pool = multiprocessing.Pool()
         pool.map(download_pdf, self.listing)
         pool.close()
         pool.join()
 
+    def merge_pdfs(self) -> None:
+        pass
+
 
 if __name__ == '__main__':
     root = tk.Tk()
+    root.title("MSDS Corpus")
+    root.resizable(width=False, height=False)
 
     window = Window(root)
     window.read_from_csv()
