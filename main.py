@@ -3,6 +3,9 @@ import csv
 from datetime import date
 import urllib.request
 import tkinter as tk
+import multiprocessing
+
+import pyPdf
 
 
 class Object:
@@ -20,22 +23,19 @@ class Object:
                                                  brand=self.brand if self.brand != "" else "Material",
                                                  obj=self.obj)
 
-    def __return_pdf_name(self):
-        return (self.brand.lower() if self.brand else "Material" +
-                "_" + self.obj.lower() + ".pdf").replace(" ", " ")
 
-    def download_pdf(self):
-        dirs = "{}".format(self.obj_class)
-        if not os.path.isdir(dirs):
-            os.makedirs(dirs)
+def download_pdf(obj):
+    dirs = "{}".format(obj.obj_class)
+    if not os.path.isdir(dirs):
+        os.makedirs(dirs)
 
-        with open(os.path.join(dirs, self.__return_pdf_name()), "wb") as pdffile:
-            try:
-                request = urllib.request.urlopen(self.link)
-                pdffile.write(request.read())
-            except Exception as e:
-                print("The link {} could not be retrieved successfully!\nError: {}".format(
-                    self.link, e))
+    # TODO Modify the return_pdf_name() function
+    with open(os.path.join(dirs, self.__return_pdf_name()), "wb") as pdffile:
+        try:
+            request = urllib.request.urlopen(self.link)
+            pdffile.write(request.read())
+        except Exception as e:
+            pass
 
 
 class Window:
@@ -112,8 +112,10 @@ class Window:
                     self.listing.append(Object(*row))
 
     def download_all(self) -> None:
-        for entry in self.listing:
-            entry.download_pdf()
+        pool = multiprocessing.Pool()
+        pool.map(download_pdf, self.listing)
+        pool.close()
+        pool.join()
 
 
 if __name__ == '__main__':
